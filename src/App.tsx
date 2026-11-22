@@ -1,21 +1,23 @@
 import { useEffect, useMemo, useState } from 'react'
-import { queue } from './lib/catalog'
+import { addToQueue, entryKey, queue, react } from './lib/catalog'
 import { parseRoom } from './lib/room'
 import { buildRows } from './lib/rows'
-import { getLancamentos } from './lib/tmdb'
-import type { Summary } from './lib/types'
+import { getDetails, getLancamentos } from './lib/tmdb'
+import type { Details, Summary } from './lib/types'
 import { useDetails } from './lib/useDetails'
 import { useRoom } from './lib/useRoom'
+import DetailsModal from './components/DetailsModal'
 import Header from './components/Header'
 import Hero from './components/Hero'
 import Row from './components/Row'
 import SearchBar from './components/SearchBar'
 
 function RoomView({ roomId, ownerKey }: { roomId: string; ownerKey: string | null }) {
-  const { entries, loading, error, isOwner, add } = useRoom(roomId, ownerKey)
+  const { entries, loading, error, isOwner, add, remove, apply } = useRoom(roomId, ownerKey)
   const detailsByKey = useDetails(entries)
   const [lancamentos, setLancamentos] = useState<Summary[]>([])
-  const [, setSelectedKey] = useState<string | null>(null)
+  const [selectedKey, setSelectedKey] = useState<string | null>(null)
+  const [fetched, setFetched] = useState<Details | null>(null)
   const [addFailed, setAddFailed] = useState(false)
 
   useEffect(() => {
@@ -45,6 +47,31 @@ function RoomView({ roomId, ownerKey }: { roomId: string; ownerKey: string | nul
     return detailsByKey[pool[Math.floor(seed * pool.length)].key] ?? null
   }, [entries, detailsByKey, seed])
 
+  const selectedItem = useMemo(
+    () => (selectedKey ? rows.flatMap((r) => r.items).find((i) => i.key === selectedKey) : undefined),
+    [rows, selectedKey],
+  )
+  const selectedEntry = selectedKey ? (entries.find((e) => e.key === selectedKey) ?? null) : null
+  const selectedDetails =
+    (selectedKey && detailsByKey[selectedKey]) ||
+    (fetched && selectedKey && entryKey(fetched.mediaType, fetched.id) === selectedKey ? fetched : null)
+  const needFetch = selectedKey !== null && !detailsByKey[selectedKey] ? selectedItem?.summary : undefined
+  const fetchType = needFetch?.mediaType
+  const fetchId = needFetch?.id
+
+  useEffect(() => {
+    if (fetchType === undefined || fetchId === undefined) return
+    let cancelled = false
+    getDetails(fetchType, fetchId)
+      .then((d) => {
+        if (!cancelled) setFetched(d)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [fetchType, fetchId])
+
   const onAdd = (s: Summary) => {
     setAddFailed(false)
     add(s).catch(() => setAddFailed(true))
@@ -59,7 +86,12 @@ function RoomView({ roomId, ownerKey }: { roomId: string; ownerKey: string | nul
   else
     body = (
       <>
-        {hero && <Hero details={hero} onSelect={setSelectedKey} />}
+        {hero && <Hero
+            details={hero}
+            onSelect={setSelectedKey}
+            onWant={(key) => apply((es) => react(es, key, 'quero', Date.now()))}
+            onQueue={(key) => apply((es) => addToQueue(es, key))}
+          />}
         <main className={`rows${hero ? ' rows--hero' : ''}`}>
           {rows.map((r) => (
             <Row key={r.id} row={r} onSelect={setSelectedKey} />
@@ -79,6 +111,17 @@ function RoomView({ roomId, ownerKey }: { roomId: string; ownerKey: string | nul
         </p>
       )}
       {body}
+      {selectedKey && (
+        <DetailsModal
+          details={selectedDetails}
+          entry={selectedEntry}
+          isOwner={isOwner}
+          onApply={apply}
+          onAdd={add}
+          onRemove={remove}
+          onClose={() => setSelectedKey(null)}
+        />
+      )}
     </>
   )
 }

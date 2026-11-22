@@ -103,5 +103,11 @@ export function useRoom(roomId: string, ownerKey: string | null) {
     [roomId],
   )
 
-  return { entries, loading, error, isOwner, save, remove, add, commit }
+  // Always works from the live snapshot, never a stale render-time array.
+  const apply = useCallback(
+    (fn: (current: Entry[]) => Entry[]) => commit(fn(current.current)),
+    [commit],
+  )
+
+  return { entries, loading, error, isOwner, save, remove, add, commit, apply }
 }
