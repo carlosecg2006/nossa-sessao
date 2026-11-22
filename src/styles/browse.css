@@ -163,7 +163,13 @@
   padding: 0 4%;
   margin-top: 3vw;
 }
-.rows .row:first-child {
+.rows {
+  padding-top: 80px;
+}
+.rows--hero {
+  padding-top: 0;
+}
+.rows--hero .row:first-child {
   margin-top: -6vw;
 }
 .row-title {
@@ -180,7 +186,10 @@
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
-  padding: 8px 0;
+  /* room for the 1.08 hover scale; negative margin keeps the layout */
+  padding: 24px 1%;
+  margin: -16px -1%;
+  scroll-padding-inline: 1%;
 }
 .row-track::-webkit-scrollbar {
   display: none;
@@ -273,7 +282,9 @@
   }
   .row-arrow--prev { left: -4%; }
   .row-arrow--next { right: -4%; }
-  .row-body:hover .row-arrow {
+  .row-body:hover .row-arrow,
+  .row-body:focus-within .row-arrow,
+  .row-arrow:focus-visible {
     opacity: 1;
   }
 }

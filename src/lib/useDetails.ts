@@ -7,7 +7,8 @@ const cache = new Map<string, Details>()
 const inflight = new Set<string>()
 
 export function useDetails(entries: Entry[]): Record<string, Details> {
-  const [, bump] = useState(0)
+  // Identity changes only when new details arrive.
+  const [map, setMap] = useState<Record<string, Details>>(() => Object.fromEntries(cache))
 
   useEffect(() => {
     for (const e of entries) {
@@ -16,12 +17,12 @@ export function useDetails(entries: Entry[]): Record<string, Details> {
       getDetails(e.mediaType, e.tmdbId)
         .then((d) => {
           cache.set(e.key, d)
-          bump((n) => n + 1)
+          setMap((prev) => ({ ...prev, [e.key]: d }))
         })
         .catch(() => {})
         .finally(() => inflight.delete(e.key))
     }
   }, [entries])
 
-  return Object.fromEntries(entries.flatMap((e) => (cache.has(e.key) ? [[e.key, cache.get(e.key)!]] : [])))
+  return map
 }

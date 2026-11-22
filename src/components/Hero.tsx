@@ -1,3 +1,4 @@
+import { entryKey } from '../lib/catalog'
 import type { Details } from '../lib/types'
 
 export default function Hero({
@@ -7,7 +8,7 @@ export default function Hero({
   details: Details
   onSelect: (key: string) => void
 }) {
-  const key = `${details.mediaType}-${details.id}`
+  const key = entryKey(details.mediaType, details.id)
   const open = () => onSelect(key)
   return (
     <div

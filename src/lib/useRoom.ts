@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { collection, doc, getDoc, onSnapshot, setDoc, deleteDoc, writeBatch } from 'firebase/firestore'
-import type { Entry } from './catalog'
+import { addToCatalog, type Entry } from './catalog'
+import type { Summary } from './types'
 import { db, ensureAuth } from './firebase'
 import { diffEntries } from './room'
 
@@ -81,6 +82,15 @@ export function useRoom(roomId: string, ownerKey: string | null) {
     (key: string) => deleteDoc(doc(db(), 'rooms', roomId, 'entries', key)),
     [roomId],
   )
+  const add = useCallback(
+    async (s: Summary) => {
+      const before = current.current
+      const next = addToCatalog(before, s, Date.now())
+      if (next.length === before.length) return
+      await setDoc(doc(db(), 'rooms', roomId, 'entries', next[next.length - 1].key), next[next.length - 1])
+    },
+    [roomId],
+  )
   const commit = useCallback(
     async (next: Entry[]) => {
       const { upserts, deletes } = diffEntries(current.current, next)
@@ -93,5 +103,5 @@ export function useRoom(roomId: string, ownerKey: string | null) {
     [roomId],
   )
 
-  return { entries, loading, error, isOwner, save, remove, commit }
+  return { entries, loading, error, isOwner, save, remove, add, commit }
 }

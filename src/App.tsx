@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { addToCatalog, queue } from './lib/catalog'
+import { queue } from './lib/catalog'
 import { parseRoom } from './lib/room'
 import { buildRows } from './lib/rows'
 import { getLancamentos } from './lib/tmdb'
@@ -12,10 +12,11 @@ import Row from './components/Row'
 import SearchBar from './components/SearchBar'
 
 function RoomView({ roomId, ownerKey }: { roomId: string; ownerKey: string | null }) {
-  const { entries, loading, error, isOwner, commit } = useRoom(roomId, ownerKey)
+  const { entries, loading, error, isOwner, add } = useRoom(roomId, ownerKey)
   const detailsByKey = useDetails(entries)
   const [lancamentos, setLancamentos] = useState<Summary[]>([])
   const [, setSelectedKey] = useState<string | null>(null)
+  const [addFailed, setAddFailed] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -34,20 +35,21 @@ function RoomView({ roomId, ownerKey }: { roomId: string; ownerKey: string | nul
     [entries, detailsByKey, lancamentos, isOwner],
   )
 
-  // Random fallback film: chosen once per mount, from the first loaded catalog films.
-  const [randomKey, setRandomKey] = useState<string | null>(null)
-  useEffect(() => {
-    if (randomKey) return
-    const loaded = entries.filter((e) => detailsByKey[e.key])
-    if (loaded.length) setRandomKey(loaded[Math.floor(Math.random() * loaded.length)].key)
-  }, [entries, detailsByKey, randomKey])
+  // Random fallback film: seed fixed per mount, pool is the unwatched catalog (stable order).
+  const [seed] = useState(Math.random)
   const hero = useMemo(() => {
-    const first = queue(entries).find((e) => detailsByKey[e.key])
-    if (first) return detailsByKey[first.key]
-    return randomKey ? (detailsByKey[randomKey] ?? null) : null
-  }, [entries, detailsByKey, randomKey])
+    const head = queue(entries)[0]
+    if (head) return detailsByKey[head.key] ?? null
+    const pool = entries.filter((e) => e.status !== 'assistido').sort((a, b) => a.key.localeCompare(b.key))
+    if (!pool.length) return null
+    return detailsByKey[pool[Math.floor(seed * pool.length)].key] ?? null
+  }, [entries, detailsByKey, seed])
 
-  const onAdd = (s: Summary) => void commit(addToCatalog(entries, s, Date.now()))
+  const onAdd = (s: Summary) => {
+    setAddFailed(false)
+    add(s).catch(() => setAddFailed(true))
+  }
+  const ready = !loading && !error
 
   let body
   if (loading) body = <p className="state">Carregando…</p>
@@ -58,7 +60,7 @@ function RoomView({ roomId, ownerKey }: { roomId: string; ownerKey: string | nul
     body = (
       <>
         {hero && <Hero details={hero} onSelect={setSelectedKey} />}
-        <main className="rows">
+        <main className={`rows${hero ? ' rows--hero' : ''}`}>
           {rows.map((r) => (
             <Row key={r.id} row={r} onSelect={setSelectedKey} />
           ))}
@@ -69,8 +71,13 @@ function RoomView({ roomId, ownerKey }: { roomId: string; ownerKey: string | nul
   return (
     <>
       <Header>
-        <SearchBar onAdd={onAdd} />
+        {ready && <SearchBar onAdd={onAdd} />}
       </Header>
+      {addFailed && (
+        <p className="state state--erro" role="alert">
+          Não deu pra adicionar agora, tenta de novo.
+        </p>
+      )}
       {body}
     </>
   )

@@ -23,7 +23,7 @@ export default function Row({
         </button>
         <div className="row-track" ref={track}>
           {row.items.map((item) => (
-            <PosterCard key={item.key} item={item} watched={row.id === 'assistidos'} onSelect={onSelect} />
+            <PosterCard key={item.key} item={item} watched={item.entry?.status === 'assistido'} onSelect={onSelect} />
           ))}
         </div>
         <button type="button" className="row-arrow row-arrow--next" aria-label="Próximo" onClick={() => scroll(1)}>
