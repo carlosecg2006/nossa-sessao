@@ -36,6 +36,14 @@ O Carlos e uma amiga assistem filmes juntos pelo Kosmi. O Carlos compartilha a t
 - **Fila:** os dois adicionam filmes. A ordem muda arrastando no PC ou com setas no celular.
 - **Assistido:** o filme sai da fila e vai para "Já vimos", com a data.
 
+## Marcar sessão (pedido do Carlos)
+- Na janela do filme, o botão **📅 Marcar sessão** abre a escolha de dia e hora. Ela escolhe e manda.
+- O Carlos recebe o aviso "Ela quer ver X sábado às 20h", com os botões ✓ Confirmar e ↺ Sugerir outro horário.
+- Se ele sugerir outro horário, ela vê a sugestão no topo do site e confirma ou sugere de volta.
+- Uma sessão confirmada aparece em destaque no topo do site: "Próxima sessão: sábado, 20h, Abracadabra".
+- O site não aceita datas que já passaram. Os horários são mostrados no fuso de São Paulo.
+- A grade semanal de horários livres ficou de fora por escolha do Carlos.
+
 ## Fora do escopo
 - Tocar os filmes no site (eles assistem pelo Kosmi).
 - Links para sites de streaming não oficiais.

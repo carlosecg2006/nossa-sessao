@@ -201,6 +201,43 @@
 - [ ] **Step 4:** Run. Expected: PASS.
 - [ ] **Step 5:** Commit `feat: pick alerts and queue reorder`.
 
+### Task 7b: Marcar sessão
+
+**Files:**
+- Create: `src/lib/sessions.ts`, `src/lib/useSessions.ts`, `src/components/SessionPicker.tsx`, `src/components/SessionBanner.tsx`
+- Modify: `src/components/DetailsModal.tsx` (add the 📅 Marcar sessão button), `src/components/PickToast.tsx` (add session alerts), `firestore.rules` (add `rooms/{roomId}/sessions/{id}` with the same rule as entries)
+- Test: `src/lib/sessions.test.ts`, `src/components/SessionBanner.test.tsx`
+
+**Interfaces:**
+- Consumes: `entryKey` from Task 3, and the Firestore setup from Task 4.
+- Produces:
+  - `interface Session { id:string; key:string; when:number; status:'proposta'|'confirmada'; proposedBy:'dono'|'amiga'; updatedAt:number }`
+  - `propose(key:string, when:number, by:'dono'|'amiga', now:number): Session` (throws `Error('Data no passado')` when `when <= now`)
+  - `confirm(s:Session, now): Session`
+  - `counter(s:Session, when:number, by, now): Session` (keeps `status:'proposta'` and flips `proposedBy`)
+  - `nextConfirmed(sessions:Session[], now): Session|null`
+  - `pendingFor(sessions, me:'dono'|'amiga'): Session[]` (proposals made by the other person)
+  - `formatWhen(ms:number): string` (America/Sao_Paulo, e.g. "sábado, 29/11 às 20:00")
+  - `useSessions(roomId): { sessions:Session[]; save(s:Session):Promise<void> }`
+- `me` is `'dono'` when `isOwner` is true, and otherwise `'amiga'`.
+
+- [ ] **Step 1:** Write tests:
+  - `propose rejects past date`
+  - `confirm sets confirmada`
+  - `counter flips proposedBy and changes when`
+  - `nextConfirmed returns the soonest future confirmed and ignores past`
+  - `pendingFor returns only the other side's proposals`
+  - `formatWhen renders in São Paulo time`
+  - `SessionBanner shows "Próxima sessão: …" with the film title`
+  - `SessionBanner shows Confirmar / Sugerir outro horário for pending`
+- [ ] **Step 2:** Run `npx vitest run src/lib/sessions.test.ts src/components/SessionBanner.test.tsx`. Expected: FAIL.
+- [ ] **Step 3:** Implement:
+  - The picker is an `<input type="datetime-local">` with `min` set to now.
+  - The banner sits under the header.
+  - The owner toast reads "Ela quer ver {title} {formatWhen}".
+- [ ] **Step 4:** Run. Expected: PASS.
+- [ ] **Step 5:** Commit `feat: marcar sessão with confirm and counter-proposal`.
+
 ### Task 8: Seed, deploy, and links
 
 **Files:**
