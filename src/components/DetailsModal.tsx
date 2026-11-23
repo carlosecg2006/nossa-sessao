@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { addToQueue, markWatched, react, type Entry } from '../lib/catalog'
 import type { Details, Summary } from '../lib/types'
+import SessionPicker from './SessionPicker'
 
 const SAVE_ERROR = 'Não deu pra salvar agora, tenta de novo.'
 const FOCUSABLE = 'button, [href], iframe, input, [tabindex]:not([tabindex="-1"])'
@@ -13,6 +14,7 @@ interface Props {
   onApply: (fn: (current: Entry[]) => Entry[]) => Promise<void>
   onAdd: (s: Summary) => Promise<void>
   onRemove: (key: string) => Promise<void>
+  onPropose: (key: string, when: number) => Promise<void>
   onClose: () => void
 }
 
@@ -24,7 +26,7 @@ function runtime(min: number | null): string | null {
   return m ? `${h}h ${m}min` : `${h}h`
 }
 
-export default function DetailsModal({ details, loadFailed = false, entry, isOwner, onApply, onAdd, onRemove, onClose }: Props) {
+export default function DetailsModal({ details, loadFailed = false, entry, isOwner, onApply, onAdd, onRemove, onPropose, onClose }: Props) {
   const titleId = useId()
   const panelRef = useRef<HTMLDivElement>(null)
   const downOnBackdrop = useRef(false)
@@ -198,6 +200,7 @@ export default function DetailsModal({ details, loadFailed = false, entry, isOwn
                         Remover do catálogo
                       </button>
                     )}
+                    <SessionPicker onPropose={(when) => onPropose(key, when)} onError={() => setFailed(true)} />
                   </>
                 )}
               </div>

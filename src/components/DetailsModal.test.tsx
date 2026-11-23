@@ -42,12 +42,13 @@ function setup(p: { details?: Details | null; entry?: Entry | null; isOwner?: bo
   const onAdd = vi.fn().mockResolvedValue(undefined)
   const onRemove = vi.fn().mockResolvedValue(undefined)
   const onClose = vi.fn()
+  const onPropose = vi.fn().mockResolvedValue(undefined)
   const d = p.details === undefined ? details() : p.details
   const e = p.entry === undefined ? entry() : p.entry
   render(
-    <DetailsModal details={d} entry={e} isOwner={p.isOwner ?? false} onApply={onApply} onAdd={onAdd} onRemove={onRemove} onClose={onClose} />,
+    <DetailsModal details={d} entry={e} isOwner={p.isOwner ?? false} onApply={onApply} onAdd={onAdd} onRemove={onRemove} onPropose={onPropose} onClose={onClose} />,
   )
-  return { onApply, onAdd, onRemove, onClose }
+  return { onApply, onAdd, onRemove, onPropose, onClose }
 }
 
 describe('DetailsModal', () => {
@@ -191,7 +192,7 @@ describe('DetailsModal', () => {
   })
 
   it('shows load error instead of Carregando when loadFailed', () => {
-    render(<DetailsModal details={null} loadFailed entry={null} isOwner={false} onApply={vi.fn()} onAdd={vi.fn()} onRemove={vi.fn()} onClose={vi.fn()} />)
+    render(<DetailsModal details={null} loadFailed entry={null} isOwner={false} onApply={vi.fn()} onAdd={vi.fn()} onRemove={vi.fn()} onPropose={vi.fn()} onClose={vi.fn()} />)
     expect(screen.getByText('Não deu pra carregar esse filme agora.')).toBeInTheDocument()
     expect(screen.queryByText('Carregando…')).toBeNull()
   })
@@ -201,7 +202,7 @@ describe('DetailsModal', () => {
     document.body.appendChild(opener)
     opener.focus()
     const onClose = vi.fn()
-    const props = { details: details(), entry: entry(), isOwner: false, onApply: vi.fn(), onAdd: vi.fn(), onRemove: vi.fn(), onClose }
+    const props = { details: details(), entry: entry(), isOwner: false, onApply: vi.fn(), onAdd: vi.fn(), onRemove: vi.fn(), onPropose: vi.fn(), onClose }
     const { unmount } = render(<DetailsModal {...props} />)
     const dialog = screen.getByRole('dialog')
     expect(dialog).toContainElement(document.activeElement as HTMLElement)
@@ -216,5 +217,27 @@ describe('DetailsModal', () => {
     expect(document.activeElement).toBe(opener)
     expect(document.body.style.overflow).toBe('')
     opener.remove()
+  })
+
+  it('offers Marcar sessão only for catalog films and sends key + time', async () => {
+    const { onPropose } = setup()
+    fireEvent.click(screen.getByRole('button', { name: '📅 Marcar sessão' }))
+    fireEvent.change(screen.getByLabelText('Dia e horário'), { target: { value: '2999-01-01T20:00' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Enviar' }))
+    await waitFor(() => expect(onPropose).toHaveBeenCalledWith('movie-7', new Date('2999-01-01T20:00').getTime()))
+  })
+
+  it('hides Marcar sessão when the film is not in the catalog', () => {
+    setup({ entry: null })
+    expect(screen.queryByRole('button', { name: '📅 Marcar sessão' })).toBeNull()
+  })
+
+  it('shows the save error when proposing fails', async () => {
+    const { onPropose } = setup()
+    onPropose.mockRejectedValue(new Error('x'))
+    fireEvent.click(screen.getByRole('button', { name: '📅 Marcar sessão' }))
+    fireEvent.change(screen.getByLabelText('Dia e horário'), { target: { value: '2999-01-01T20:00' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Enviar' }))
+    expect(await screen.findByText('Não deu pra salvar agora, tenta de novo.')).toBeInTheDocument()
   })
 })

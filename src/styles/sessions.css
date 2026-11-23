@@ -1,0 +1,63 @@
+.session-banner {
+  margin: 8px 16px;
+  padding: 12px 14px;
+  border-radius: 8px;
+}
+.session-banner--pending {
+  background: #241638;
+  border: 1px solid var(--roxo);
+}
+.session-banner--next {
+  padding: 0;
+}
+.session-pill {
+  display: inline-block;
+  max-width: 100%;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--roxo);
+  color: var(--texto);
+  font-size: 14px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.session-text {
+  margin: 0 0 10px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.session-actions,
+.session-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.session-form {
+  margin-top: 10px;
+}
+.session-label {
+  flex-basis: 100%;
+  color: var(--cinza);
+  font-size: 13px;
+}
+.session-input {
+  flex: 1 1 180px;
+  min-width: 0;
+  min-height: 40px;
+  padding: 6px 10px;
+  border: 1px solid var(--cinza);
+  border-radius: 6px;
+  background: var(--preto);
+  color: var(--texto);
+  color-scheme: dark;
+  font: inherit;
+}
+.session-picker {
+  flex-basis: 100%;
+}
+.session-ok {
+  margin: 8px 0 0;
+  color: var(--cinza);
+  font-size: 14px;
+}

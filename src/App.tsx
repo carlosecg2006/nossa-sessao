@@ -4,18 +4,32 @@ import { parseRoom } from './lib/room'
 import { buildRows } from './lib/rows'
 import { getDetails, getLancamentos } from './lib/tmdb'
 import type { Details, Summary } from './lib/types'
+import { confirm, counter, propose, type Session } from './lib/sessions'
 import { useDetails } from './lib/useDetails'
 import { useRoom } from './lib/useRoom'
+import { useSessions } from './lib/useSessions'
 import DetailsModal from './components/DetailsModal'
 import Header from './components/Header'
 import Hero from './components/Hero'
 import PickToast from './components/PickToast'
 import Row from './components/Row'
 import SearchBar from './components/SearchBar'
+import SessionBanner from './components/SessionBanner'
 
 function RoomView({ roomId, ownerKey }: { roomId: string; ownerKey: string | null }) {
   const { entries, loading, error, isOwner, add, remove, apply } = useRoom(roomId, ownerKey)
   const detailsByKey = useDetails(entries)
+  const { sessions, save: saveSession } = useSessions(roomId)
+  const me = isOwner ? 'dono' : 'amiga'
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 60_000)
+    return () => clearInterval(t)
+  }, [])
+  const titleByKey = useMemo(
+    () => Object.fromEntries(Object.entries(detailsByKey).map(([k, d]) => [k, d.title])),
+    [detailsByKey],
+  )
   const [lancamentos, setLancamentos] = useState<Summary[]>([])
   const [selectedKey, setSelectedKey] = useState<string | null>(null)
   const [fetched, setFetched] = useState<{ key: string; details: Details | null } | null>(null)
@@ -85,6 +99,11 @@ function RoomView({ roomId, ownerKey }: { roomId: string; ownerKey: string | nul
     setNotice(null)
     apply(fn).catch(() => setNotice('Não deu pra salvar agora, tenta de novo.'))
   }
+  const sessionSave = (s: Session) => {
+    setNotice(null)
+    saveSession(s).catch(() => setNotice('Não deu pra salvar agora, tenta de novo.'))
+  }
+  const onPropose = (key: string, when: number) => saveSession(propose(key, when, me, Date.now()))
   const ready = !loading && !error
 
   let body
@@ -125,6 +144,20 @@ function RoomView({ roomId, ownerKey }: { roomId: string; ownerKey: string | nul
           {notice}
         </p>
       )}
+      <SessionBanner
+        sessions={sessions}
+        me={me}
+        now={now}
+        titleByKey={titleByKey}
+        onConfirm={(s) => sessionSave(confirm(s, Date.now()))}
+        onCounter={(s, when) => {
+          try {
+            sessionSave(counter(s, when, me, Date.now()))
+          } catch {
+            setNotice('Escolha um horário que ainda não passou.')
+          }
+        }}
+      />
       {body}
       <PickToast entries={entries} detailsByKey={detailsByKey} isOwner={isOwner} roomId={roomId} onOpen={setSelectedKey} />
       {selectedKey && (
@@ -136,6 +169,7 @@ function RoomView({ roomId, ownerKey }: { roomId: string; ownerKey: string | nul
           onApply={apply}
           onAdd={add}
           onRemove={remove}
+          onPropose={onPropose}
           onClose={() => setSelectedKey(null)}
         />
       )}
