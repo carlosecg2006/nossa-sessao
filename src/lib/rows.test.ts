@@ -11,6 +11,7 @@ const entry = (id: number, over: Partial<Entry> = {}): Entry => ({
   queuePos: null,
   reaction: null,
   pickedAt: null,
+  pickedBy: null,
   watchedAt: null,
   addedAt: 0,
   ...over,
@@ -61,6 +62,15 @@ describe('buildRows', () => {
   it('Lançamentos excludes items already in the catalog', () => {
     const rows = buildRows([entry(1)], detailsFor(details(1)), [summary(1), summary(2)], false)
     expect(ids(rows, 'Lançamentos')).toEqual(['movie-2'])
+  })
+
+  it('Escolhidos por ela excludes the owner picks', () => {
+    const entries = [
+      entry(1, { reaction: 'quero', pickedAt: 5, pickedBy: 'dono' }),
+      entry(2, { reaction: 'quero', pickedAt: 6, pickedBy: 'amiga' }),
+    ]
+    const rows = buildRows(entries, detailsFor(details(1), details(2)), [], true)
+    expect(ids(rows, 'Escolhidos por ela')).toEqual(['movie-2'])
   })
 
   it('orders rows: fila, escolhidos, genres, lançamentos, já vimos, revisar', () => {

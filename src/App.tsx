@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { addToQueue, entryKey, queue, react, type Entry } from './lib/catalog'
+import { addToQueue, entryKey, moveInQueue, moveToPosition, queue, react, type Entry } from './lib/catalog'
 import { parseRoom } from './lib/room'
 import { buildRows } from './lib/rows'
 import { getDetails, getLancamentos } from './lib/tmdb'
@@ -9,6 +9,7 @@ import { useRoom } from './lib/useRoom'
 import DetailsModal from './components/DetailsModal'
 import Header from './components/Header'
 import Hero from './components/Hero'
+import PickToast from './components/PickToast'
 import Row from './components/Row'
 import SearchBar from './components/SearchBar'
 
@@ -97,12 +98,18 @@ function RoomView({ roomId, ownerKey }: { roomId: string; ownerKey: string | nul
         {hero && <Hero
             details={hero}
             onSelect={setSelectedKey}
-            onWant={(key) => heroApply((es) => react(es, key, 'quero', Date.now()))}
+            onWant={(key) => heroApply((es) => react(es, key, 'quero', Date.now(), isOwner ? 'dono' : 'amiga'))}
             onQueue={(key) => heroApply((es) => addToQueue(es, key))}
           />}
         <main className={`rows${hero ? ' rows--hero' : ''}`}>
           {rows.map((r) => (
-            <Row key={r.id} row={r} onSelect={setSelectedKey} />
+            <Row
+              key={r.id}
+              row={r}
+              onSelect={setSelectedKey}
+              onMove={(key, dir) => heroApply((es) => moveInQueue(es, key, dir))}
+              onDrop={(key, pos) => heroApply((es) => moveToPosition(es, key, pos))}
+            />
           ))}
         </main>
       </>
@@ -119,6 +126,7 @@ function RoomView({ roomId, ownerKey }: { roomId: string; ownerKey: string | nul
         </p>
       )}
       {body}
+      <PickToast entries={entries} detailsByKey={detailsByKey} isOwner={isOwner} roomId={roomId} onOpen={setSelectedKey} />
       {selectedKey && (
         <DetailsModal
           details={selectedDetails}

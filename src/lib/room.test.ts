@@ -5,7 +5,7 @@ import type { Entry } from './catalog'
 const ID = 'aB3dE5gH7jK9mN1pQ3rS'
 const e = (key: string, over: Partial<Entry> = {}): Entry => ({
   key, tmdbId: 1, mediaType: 'movie', status: 'catalogo', queuePos: null,
-  reaction: null, pickedAt: null, watchedAt: null, addedAt: 1, ...over,
+  reaction: null, pickedAt: null, pickedBy: null, watchedAt: null, addedAt: 1, ...over,
 })
 
 describe('parseRoom', () => {

@@ -157,7 +157,7 @@ export default function DetailsModal({ details, loadFailed = false, entry, isOwn
                       type="button"
                       className={`btn btn--secondary${entry.reaction === 'quero' ? ' btn--pressed' : ''}`}
                       aria-pressed={entry.reaction === 'quero'}
-                      onClick={() => apply((es) => react(es, key, 'quero', Date.now()))}
+                      onClick={() => apply((es) => react(es, key, 'quero', Date.now(), isOwner ? 'dono' : 'amiga'))}
                     >
                       {entry.reaction === 'quero' ? '♥ Você quer ver' : '♥ Quero ver'}
                     </button>
@@ -165,7 +165,7 @@ export default function DetailsModal({ details, loadFailed = false, entry, isOwn
                       type="button"
                       className={`btn btn--secondary${entry.reaction === 'naocurti' ? ' btn--pressed' : ''}`}
                       aria-pressed={entry.reaction === 'naocurti'}
-                      onClick={() => apply((es) => react(es, key, 'naocurti', Date.now()))}
+                      onClick={() => apply((es) => react(es, key, 'naocurti', Date.now(), isOwner ? 'dono' : 'amiga'))}
                     >
                       👎 Não curti
                     </button>

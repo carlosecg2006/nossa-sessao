@@ -31,6 +31,7 @@ const entry = (o: Partial<Entry> = {}): Entry => ({
   queuePos: null,
   reaction: null,
   pickedAt: null,
+  pickedBy: null,
   watchedAt: null,
   addedAt: 1,
   ...o,
@@ -95,6 +96,7 @@ describe('DetailsModal', () => {
     expect(onApply).toHaveBeenCalledTimes(1)
     const out = onApply.mock.calls[0][0]([entry()])
     expect(out[0].reaction).toBe('quero')
+    expect(out[0].pickedBy).toBe('amiga')
     await waitFor(() => expect(onApply).toHaveBeenCalled())
   })
 

@@ -1,6 +1,7 @@
 import type { MediaType, Summary } from './types'
 
 export type Status = 'catalogo' | 'fila' | 'assistido'
+export type Person = 'dono' | 'amiga'
 export type Reaction = 'quero' | 'naocurti'
 
 export interface Entry {
@@ -11,6 +12,7 @@ export interface Entry {
   queuePos: number | null
   reaction: Reaction | null
   pickedAt: number | null
+  pickedBy: Person | null
   watchedAt: number | null
   addedAt: number
 }
@@ -33,6 +35,7 @@ export function addToCatalog(entries: Entry[], s: Summary, now: number): Entry[]
       queuePos: null,
       reaction: null,
       pickedAt: null,
+      pickedBy: null,
       watchedAt: null,
       addedAt: now,
     },
@@ -79,15 +82,33 @@ export function markWatched(entries: Entry[], key: string, now: number): Entry[]
   return marked.map((e) => (order.has(e.key) ? { ...e, queuePos: order.get(e.key)! } : e))
 }
 
-export function react(entries: Entry[], key: string, r: Reaction, now: number): Entry[] {
+export function moveToPosition(entries: Entry[], key: string, targetPos: number): Entry[] {
+  const q = queue(entries)
+  const from = q.findIndex((e) => e.key === key)
+  if (from === -1 || !Number.isInteger(targetPos) || targetPos < 0 || targetPos >= q.length) {
+    return [...entries]
+  }
+  const order = q.map((e) => e.key)
+  order.splice(from, 1)
+  order.splice(targetPos, 0, key)
+  const pos = new Map(order.map((k, i) => [k, i]))
+  return entries.map((e) => (pos.has(e.key) ? { ...e, queuePos: pos.get(e.key)! } : e))
+}
+
+export function react(entries: Entry[], key: string, r: Reaction, now: number, by: Person): Entry[] {
   return patch(entries, key, (e) => {
     if (e.reaction === r) return { ...e }
-    return { ...e, reaction: r, pickedAt: r === 'quero' ? now : null }
+    return r === 'quero'
+      ? { ...e, reaction: r, pickedAt: now, pickedBy: by }
+      : { ...e, reaction: r, pickedAt: null, pickedBy: null }
   })
 }
 
 export const picks = (entries: Entry[]): Entry[] =>
   entries.filter((e) => e.reaction === 'quero').sort((a, b) => (b.pickedAt ?? 0) - (a.pickedAt ?? 0))
+
+// Old entries without pickedBy count as hers.
+export const herPicks = (entries: Entry[]): Entry[] => picks(entries).filter((e) => e.pickedBy !== 'dono')
 
 export const toReview = (entries: Entry[]): Entry[] =>
   entries.filter((e) => e.reaction === 'naocurti')
@@ -98,4 +119,4 @@ export const watched = (entries: Entry[]): Entry[] =>
     .sort((a, b) => (b.watchedAt ?? 0) - (a.watchedAt ?? 0))
 
 export const newPicksSince = (entries: Entry[], lastSeen: number): Entry[] =>
-  picks(entries).filter((e) => (e.pickedAt ?? 0) > lastSeen)
+  herPicks(entries).filter((e) => (e.pickedAt ?? 0) > lastSeen)

@@ -1,4 +1,4 @@
-import { entryKey, picks, queue, toReview, watched, type Entry } from './catalog'
+import { entryKey, herPicks, queue, toReview, watched, type Entry } from './catalog'
 import type { Details, Summary } from './types'
 
 export interface RowItem {
@@ -45,7 +45,7 @@ export function buildRows(
 
   const rows: Row[] = [
     { id: 'fila', title: 'Nossa fila', items: toItems(queue(entries)) },
-    { id: 'escolhidos', title: 'Escolhidos por ela', items: toItems(picks(entries)) },
+    { id: 'escolhidos', title: 'Escolhidos por ela', items: toItems(herPicks(entries)) },
     ...genreRows,
     { id: 'lancamentos', title: 'Lançamentos', items: novos },
     { id: 'assistidos', title: 'Já vimos ✓', items: toItems(watched(entries)) },
