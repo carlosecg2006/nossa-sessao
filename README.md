@@ -6,6 +6,12 @@ Este guia leva você do zero até o site no ar. Faça um passo de cada vez.
 
 ---
 
+## 0. Instalar o Node.js
+
+Instale o Node.js LTS em https://nodejs.org e confira com `node -v` (precisa ser 20.19 ou mais novo).
+
+---
+
 ## 1. Pegar a chave do TMDB
 
 O TMDB é o site que fornece os dados dos filmes (pôsteres, sinopse, trailer).
@@ -37,7 +43,7 @@ O site entra sozinho, sem pedir login para ninguém. Para isso funcionar:
 1. Menu: **Build → Firestore Database → Criar banco de dados**.
 2. Escolha o modo **produção**.
 3. Em localização, escolha **southamerica-east1** (São Paulo).
-4. Termine a criação. (As regras de segurança serão enviadas no passo 6.)
+4. Termine a criação. (As regras de segurança serão enviadas no passo 5, antes de criar a sala.)
 
 ### 2.3 Registrar o app web e copiar a configuração
 
@@ -75,7 +81,14 @@ Rode no terminal, dentro da pasta do projeto, um comando por vez:
    - Quando pedir um apelido (alias), digite `default`.
    - Isso cria o arquivo `.firebaserc`. É normal ele aparecer.
 
-## 5. Criar a sala com os filmes iniciais
+## 5. Enviar as regras de segurança do banco
+
+O banco novo (modo produção) bloqueia tudo até as regras serem enviadas. Faça isso **antes** do próximo passo.
+
+1. Rode: `npx firebase deploy --only firestore:rules`
+2. Espere aparecer "Deploy complete!".
+
+## 6. Criar a sala com os filmes iniciais
 
 1. Rode: `npm run seed`
 2. Espere uns segundos. No final vão aparecer **dois links**:
@@ -86,19 +99,19 @@ Rode no terminal, dentro da pasta do projeto, um comando por vez:
 
 > Rode o seed **uma vez só**. Cada vez que roda, cria uma sala nova (e links novos).
 
-## 6. Colocar o site no ar
+## 7. Colocar o site no ar
 
 1. Rode: `npm run deploy`
 2. No final aparece o "Hosting URL" (algo como `https://nossa-sessao.web.app`). Esse comando também envia as regras do banco.
 
-## 7. Qual link mandar para quem
+## 8. Qual link mandar para quem
 
 - **Para ela**: o link **SEM** `dono`.
 - **Para você (guarde só com você)**: o link **COM** `&dono=...`. Quem tem esse link tem poderes de dono, então não compartilhe.
 
 Dica: abra o link dela no celular. Não deve aparecer tela de login.
 
-## 8. Testar no seu computador
+## 9. Testar no seu computador
 
 1. Rode: `npm run dev`
 2. Abra o endereço que aparecer (normalmente http://localhost:5173) e adicione ao final o mesmo `?sala=...` do seu link.
