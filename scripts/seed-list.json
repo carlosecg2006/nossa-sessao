@@ -1,0 +1,104 @@
+[
+  {
+    "search": "Hocus Pocus",
+    "year": "1993",
+    "mediaType": "movie"
+  },
+  {
+    "search": "Bewitched",
+    "year": "2005",
+    "mediaType": "movie"
+  },
+  {
+    "search": "The Witches of Eastwick",
+    "year": "1987",
+    "mediaType": "movie"
+  },
+  {
+    "search": "Teen Witch",
+    "year": "1989",
+    "mediaType": "movie"
+  },
+  {
+    "search": "The Witches",
+    "year": "1990",
+    "mediaType": "movie"
+  },
+  {
+    "search": "The Craft",
+    "year": "1996",
+    "mediaType": "movie"
+  },
+  {
+    "search": "Sabrina the Teenage Witch",
+    "year": "1996",
+    "mediaType": "movie"
+  },
+  {
+    "search": "Charmed",
+    "year": "1998",
+    "mediaType": "tv"
+  },
+  {
+    "search": "Die kleine Hexe",
+    "year": "2018",
+    "mediaType": "movie"
+  },
+  {
+    "search": "Death Becomes Her",
+    "year": "1992",
+    "mediaType": "movie"
+  },
+  {
+    "search": "Vamps",
+    "year": "2012",
+    "mediaType": "movie"
+  },
+  {
+    "search": "Dirty Dancing",
+    "year": "1987",
+    "mediaType": "movie"
+  },
+  {
+    "search": "Before Sunrise",
+    "year": "1995",
+    "mediaType": "movie"
+  },
+  {
+    "search": "Before Sunset",
+    "year": "2004",
+    "mediaType": "movie"
+  },
+  {
+    "search": "Before Midnight",
+    "year": "2013",
+    "mediaType": "movie"
+  },
+  {
+    "search": "About Time",
+    "year": "2013",
+    "mediaType": "movie"
+  },
+  {
+    "search": "The Idea of You",
+    "year": "2024",
+    "mediaType": "movie"
+  },
+  {
+    "search": "The Life List",
+    "year": "2025",
+    "mediaType": "movie"
+  },
+  {
+    "search": "Practical Magic",
+    "year": "1998",
+    "mediaType": "movie",
+    "watched": true
+  },
+  {
+    "search": "Practical Magic 2",
+    "year": "2026",
+    "mediaType": "movie",
+    "watched": true
+  }
+]

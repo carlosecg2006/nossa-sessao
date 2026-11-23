@@ -1,10 +1,13 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import movie from './__fixtures__/movie.json'
 import search from './__fixtures__/search.json'
 import tv from './__fixtures__/tv.json'
 import { getDetails, getLancamentos, imageUrl, mapDetails, pickTrailer, searchTitles } from './tmdb'
 
-afterEach(() => vi.unstubAllGlobals())
+afterEach(() => {
+  vi.unstubAllGlobals()
+  vi.unstubAllEnvs()
+})
 
 function stubFetch(handler: (url: URL) => unknown) {
   const fn = vi.fn(async (input: RequestInfo | URL) => ({
@@ -100,6 +103,15 @@ describe('pickTrailer', () => {
 })
 
 describe('fetching functions', () => {
+  beforeEach(() => vi.stubEnv('VITE_TMDB_KEY', 'chave-de-teste'))
+
+  it('explains a missing key instead of calling TMDB', async () => {
+    vi.stubEnv('VITE_TMDB_KEY', '')
+    const fn = stubFetch(() => search)
+    await expect(searchTitles('x')).rejects.toThrow('Defina VITE_TMDB_KEY no arquivo .env')
+    expect(fn).not.toHaveBeenCalled()
+  })
+
   it('searchTitles drops people and maps summaries', async () => {
     const fn = stubFetch(() => search)
     const r = await searchTitles('matrix')

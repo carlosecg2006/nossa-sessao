@@ -1,3 +1,4 @@
+import { env } from './env'
 import type { Details, MediaType, Summary } from './types'
 
 const API = 'https://api.themoviedb.org/3'
@@ -69,8 +70,10 @@ export function mapDetails(raw: Raw, mediaType: MediaType, rawEnOverview?: strin
 }
 
 async function get(path: string, params: Record<string, string> = {}): Promise<Raw> {
+  const key = env('VITE_TMDB_KEY')
+  if (!key) throw new Error('Defina VITE_TMDB_KEY no arquivo .env')
   const qs = new URLSearchParams({
-    api_key: import.meta.env.VITE_TMDB_KEY,
+    api_key: key,
     language: 'pt-BR',
     ...params,
   })
