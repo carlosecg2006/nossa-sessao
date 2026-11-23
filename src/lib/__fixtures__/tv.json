@@ -1,0 +1,21 @@
+{
+  "id": 1396,
+  "name": "Breaking Bad",
+  "overview": "Um professor de química vira fabricante de metanfetamina.",
+  "first_air_date": "2008-01-20",
+  "episode_run_time": [47, 45],
+  "poster_path": "/tvposter.jpg",
+  "backdrop_path": "/tvbackdrop.jpg",
+  "genres": [{ "id": 18, "name": "Drama" }],
+  "created_by": [{ "name": "Vince Gilligan" }],
+  "videos": { "results": [] },
+  "images": { "backdrops": [] },
+  "credits": { "cast": [{ "name": "Bryan Cranston" }], "crew": [] },
+  "watch/providers": { "results": {} },
+  "content_ratings": {
+    "results": [
+      { "iso_3166_1": "US", "rating": "TV-MA" },
+      { "iso_3166_1": "BR", "rating": "18" }
+    ]
+  }
+}

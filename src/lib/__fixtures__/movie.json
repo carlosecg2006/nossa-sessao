@@ -1,0 +1,56 @@
+{
+  "id": 603,
+  "title": "Matrix",
+  "overview": "Um hacker descobre a verdadeira natureza da realidade.",
+  "release_date": "1999-03-30",
+  "runtime": 136,
+  "poster_path": "/poster.jpg",
+  "backdrop_path": "/backdrop.jpg",
+  "genre_ids": [28, 878],
+  "genres": [{ "id": 28, "name": "Ação" }, { "id": 878, "name": "Ficção científica" }],
+  "videos": {
+    "results": [
+      { "key": "teaser1", "site": "YouTube", "type": "Teaser", "official": true },
+      { "key": "vimeo1", "site": "Vimeo", "type": "Trailer", "official": true },
+      { "key": "unofficial1", "site": "YouTube", "type": "Trailer", "official": false },
+      { "key": "official1", "site": "YouTube", "type": "Trailer", "official": true }
+    ]
+  },
+  "images": {
+    "backdrops": [
+      { "file_path": "/b1.jpg" }, { "file_path": "/b2.jpg" }, { "file_path": "/b3.jpg" },
+      { "file_path": "/b4.jpg" }, { "file_path": "/b5.jpg" }, { "file_path": "/b6.jpg" },
+      { "file_path": "/b7.jpg" }, { "file_path": "/b8.jpg" }, { "file_path": "/b9.jpg" },
+      { "file_path": "/b10.jpg" }, { "file_path": "/b11.jpg" }, { "file_path": "/b12.jpg" }
+    ]
+  },
+  "credits": {
+    "cast": [
+      { "name": "Keanu Reeves" }, { "name": "Laurence Fishburne" }, { "name": "Carrie-Anne Moss" },
+      { "name": "Hugo Weaving" }, { "name": "Joe Pantoliano" }, { "name": "Gloria Foster" }
+    ],
+    "crew": [
+      { "name": "Joel Silver", "job": "Producer" },
+      { "name": "Lana Wachowski", "job": "Director" },
+      { "name": "Lilly Wachowski", "job": "Director" }
+    ]
+  },
+  "watch/providers": {
+    "results": {
+      "US": { "flatrate": [{ "provider_name": "Hulu", "logo_path": "/hulu.jpg" }] },
+      "BR": {
+        "rent": [{ "provider_name": "Apple TV", "logo_path": "/apple.jpg" }],
+        "flatrate": [
+          { "provider_name": "Max", "logo_path": "/max.jpg" },
+          { "provider_name": "Netflix", "logo_path": "/netflix.jpg" }
+        ]
+      }
+    }
+  },
+  "release_dates": {
+    "results": [
+      { "iso_3166_1": "US", "release_dates": [{ "certification": "R" }] },
+      { "iso_3166_1": "BR", "release_dates": [{ "certification": "" }, { "certification": "14" }] }
+    ]
+  }
+}

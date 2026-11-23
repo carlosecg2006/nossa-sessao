@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  --roxo: #8b3dff;
+  --preto: #0b0710;
+  --texto: #f4eeff;
+  --cinza: #a99bc2;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--preto);
+  color: var(--texto);
+  font-family: 'Inter', system-ui, sans-serif;
+}
