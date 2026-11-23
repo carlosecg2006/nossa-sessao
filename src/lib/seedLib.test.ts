@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { Summary } from '../src/lib/types'
+import type { Summary } from './types'
 import { buildSeedEntries, pickMatch } from './seedLib'
 
 const s = (id: number, mediaType: 'movie' | 'tv', year: string): Summary => ({

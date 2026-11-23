@@ -135,3 +135,12 @@ Confira o `VITE_TMDB_KEY` no `.env`. Tem que ser a "Chave da API" curta, não o 
 O `.env` não existe ou está com campo vazio. Volte ao passo 3.
 
 **Nunca coloque suas chaves no README nem no GitHub.** Elas ficam só no `.env`.
+
+## Publicar pelo GitHub (sem terminal)
+
+O site também pode ser publicado automaticamente pelo GitHub Pages:
+
+1. No repositório, **Settings → Secrets and variables → Actions → New repository secret**. Crie um segredo para cada linha do `.env.example` (`VITE_TMDB_KEY`, `VITE_FIREBASE_API_KEY`, etc.) com o valor correspondente.
+2. **Settings → Pages → Source: GitHub Actions.**
+3. Toda vez que algo entra na `master`, o GitHub testa, monta e publica o site em `https://<seu-usuario>.github.io/nossa-sessao/`.
+4. Para criar a sala, abra `https://<seu-usuario>.github.io/nossa-sessao/?criar=1` e clique em **Criar sala**. Os dois links aparecem na tela — guarde o seu (com `dono`) só pra você.

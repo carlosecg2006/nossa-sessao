@@ -9,6 +9,7 @@ import { useDetails } from './lib/useDetails'
 import { useRoom } from './lib/useRoom'
 import { useSessions } from './lib/useSessions'
 import DetailsModal from './components/DetailsModal'
+import CreateRoom from './components/CreateRoom'
 import Header from './components/Header'
 import Hero from './components/Hero'
 import PickToast from './components/PickToast'
@@ -200,6 +201,14 @@ function RoomView({ roomId, ownerKey }: { roomId: string; ownerKey: string | nul
 }
 
 export default function App() {
+  if (new URLSearchParams(window.location.search).has('criar')) {
+    return (
+      <>
+        <Header />
+        <CreateRoom />
+      </>
+    )
+  }
   const room = parseRoom(window.location.search)
   if (room) return <RoomView roomId={room.roomId} ownerKey={room.ownerKey} />
   return <MissingRoom />

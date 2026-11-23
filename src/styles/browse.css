@@ -395,3 +395,19 @@
   padding-top: 72px;
   color: var(--texto);
 }
+
+.create-room {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 96px 4% 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.create-room a {
+  color: var(--roxo);
+  overflow-wrap: anywhere;
+}
+.create-room .btn {
+  align-self: flex-start;
+}

@@ -1,5 +1,5 @@
-import { addToCatalog, markWatched, entryKey, type Entry } from '../src/lib/catalog'
-import type { MediaType, Summary } from '../src/lib/types'
+import { addToCatalog, markWatched, entryKey, type Entry } from './catalog'
+import type { MediaType, Summary } from './types'
 
 export interface SeedItem {
   search: string
