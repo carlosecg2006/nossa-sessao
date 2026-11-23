@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { addToQueue, entryKey, queue, react } from './lib/catalog'
+import { addToQueue, entryKey, queue, react, type Entry } from './lib/catalog'
 import { parseRoom } from './lib/room'
 import { buildRows } from './lib/rows'
 import { getDetails, getLancamentos } from './lib/tmdb'
@@ -17,8 +17,8 @@ function RoomView({ roomId, ownerKey }: { roomId: string; ownerKey: string | nul
   const detailsByKey = useDetails(entries)
   const [lancamentos, setLancamentos] = useState<Summary[]>([])
   const [selectedKey, setSelectedKey] = useState<string | null>(null)
-  const [fetched, setFetched] = useState<Details | null>(null)
-  const [addFailed, setAddFailed] = useState(false)
+  const [fetched, setFetched] = useState<{ key: string; details: Details | null } | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -52,29 +52,37 @@ function RoomView({ roomId, ownerKey }: { roomId: string; ownerKey: string | nul
     [rows, selectedKey],
   )
   const selectedEntry = selectedKey ? (entries.find((e) => e.key === selectedKey) ?? null) : null
-  const selectedDetails =
-    (selectedKey && detailsByKey[selectedKey]) ||
-    (fetched && selectedKey && entryKey(fetched.mediaType, fetched.id) === selectedKey ? fetched : null)
-  const needFetch = selectedKey !== null && !detailsByKey[selectedKey] ? selectedItem?.summary : undefined
+  const fetchedForSelected = fetched && fetched.key === selectedKey ? fetched : null
+  const selectedDetails = (selectedKey && detailsByKey[selectedKey]) || fetchedForSelected?.details || null
+  const loadFailed = !selectedEntry && fetchedForSelected !== null && fetchedForSelected.details === null
+  // Catalog entries get their details from useDetails; only off-catalog items are fetched here.
+  const needFetch = selectedKey !== null && !selectedEntry ? selectedItem?.summary : undefined
   const fetchType = needFetch?.mediaType
   const fetchId = needFetch?.id
 
   useEffect(() => {
     if (fetchType === undefined || fetchId === undefined) return
+    const key = entryKey(fetchType, fetchId)
     let cancelled = false
     getDetails(fetchType, fetchId)
       .then((d) => {
-        if (!cancelled) setFetched(d)
+        if (!cancelled) setFetched({ key, details: d })
       })
-      .catch(() => {})
+      .catch(() => {
+        if (!cancelled) setFetched({ key, details: null })
+      })
     return () => {
       cancelled = true
     }
   }, [fetchType, fetchId])
 
   const onAdd = (s: Summary) => {
-    setAddFailed(false)
-    add(s).catch(() => setAddFailed(true))
+    setNotice(null)
+    add(s).catch(() => setNotice('Não deu pra adicionar agora, tenta de novo.'))
+  }
+  const heroApply = (fn: (es: Entry[]) => Entry[]) => {
+    setNotice(null)
+    apply(fn).catch(() => setNotice('Não deu pra salvar agora, tenta de novo.'))
   }
   const ready = !loading && !error
 
@@ -89,8 +97,8 @@ function RoomView({ roomId, ownerKey }: { roomId: string; ownerKey: string | nul
         {hero && <Hero
             details={hero}
             onSelect={setSelectedKey}
-            onWant={(key) => apply((es) => react(es, key, 'quero', Date.now()))}
-            onQueue={(key) => apply((es) => addToQueue(es, key))}
+            onWant={(key) => heroApply((es) => react(es, key, 'quero', Date.now()))}
+            onQueue={(key) => heroApply((es) => addToQueue(es, key))}
           />}
         <main className={`rows${hero ? ' rows--hero' : ''}`}>
           {rows.map((r) => (
@@ -105,15 +113,16 @@ function RoomView({ roomId, ownerKey }: { roomId: string; ownerKey: string | nul
       <Header>
         {ready && <SearchBar onAdd={onAdd} />}
       </Header>
-      {addFailed && (
+      {notice && (
         <p className="state state--erro" role="alert">
-          Não deu pra adicionar agora, tenta de novo.
+          {notice}
         </p>
       )}
       {body}
       {selectedKey && (
         <DetailsModal
           details={selectedDetails}
+          loadFailed={loadFailed}
           entry={selectedEntry}
           isOwner={isOwner}
           onApply={apply}

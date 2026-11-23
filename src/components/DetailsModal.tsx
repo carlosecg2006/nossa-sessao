@@ -7,6 +7,7 @@ const FOCUSABLE = 'button, [href], iframe, input, [tabindex]:not([tabindex="-1"]
 
 interface Props {
   details: Details | null
+  loadFailed?: boolean
   entry: Entry | null
   isOwner: boolean
   onApply: (fn: (current: Entry[]) => Entry[]) => Promise<void>
@@ -23,9 +24,10 @@ function runtime(min: number | null): string | null {
   return m ? `${h}h ${m}min` : `${h}h`
 }
 
-export default function DetailsModal({ details, entry, isOwner, onApply, onAdd, onRemove, onClose }: Props) {
+export default function DetailsModal({ details, loadFailed = false, entry, isOwner, onApply, onAdd, onRemove, onClose }: Props) {
   const titleId = useId()
   const panelRef = useRef<HTMLDivElement>(null)
+  const downOnBackdrop = useRef(false)
   const closeRef = useRef(onClose)
   closeRef.current = onClose
   const [trailer, setTrailer] = useState(false)
@@ -89,8 +91,12 @@ export default function DetailsModal({ details, entry, isOwner, onApply, onAdd, 
     <div
       className="modal-backdrop"
       data-testid="modal-backdrop"
+      onMouseDown={(e) => {
+        downOnBackdrop.current = e.target === e.currentTarget
+      }}
       onClick={(e) => {
-        if (e.target === e.currentTarget) onClose()
+        if (downOnBackdrop.current && e.target === e.currentTarget) onClose()
+        downOnBackdrop.current = false
       }}
     >
       <div
@@ -107,7 +113,11 @@ export default function DetailsModal({ details, entry, isOwner, onApply, onAdd, 
         {!details ? (
           <>
             <h2 id={titleId} className="modal-title modal-title--plain">Detalhes</h2>
-            <p className="modal-loading">Carregando…</p>
+            {loadFailed ? (
+              <p className="modal-error modal-loading" role="alert">Não deu pra carregar esse filme agora.</p>
+            ) : (
+              <p className="modal-loading">Carregando…</p>
+            )}
           </>
         ) : (
           <>

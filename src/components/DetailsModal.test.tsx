@@ -158,6 +158,9 @@ describe('DetailsModal', () => {
     fireEvent.keyDown(document, { key: 'Escape' })
     expect(onClose).toHaveBeenCalledTimes(1)
     fireEvent.click(screen.getByTestId('modal-backdrop'))
+    expect(onClose).toHaveBeenCalledTimes(1) // click without mousedown on backdrop (selection drag) ignored
+    fireEvent.mouseDown(screen.getByTestId('modal-backdrop'))
+    fireEvent.click(screen.getByTestId('modal-backdrop'))
     expect(onClose).toHaveBeenCalledTimes(2)
     fireEvent.click(screen.getByRole('button', { name: 'Fechar' }))
     expect(onClose).toHaveBeenCalledTimes(3)
@@ -168,6 +171,27 @@ describe('DetailsModal', () => {
     onApply.mockRejectedValueOnce(new Error('x'))
     fireEvent.click(screen.getByRole('button', { name: '+ Fila' }))
     expect(await screen.findByText('Não deu pra salvar agora, tenta de novo.')).toBeInTheDocument()
+  })
+
+  it('shows inline error when onAdd rejects', async () => {
+    const { onAdd } = setup({ entry: null })
+    onAdd.mockRejectedValueOnce(new Error('x'))
+    fireEvent.click(screen.getByRole('button', { name: '+ Adicionar ao catálogo' }))
+    expect(await screen.findByText('Não deu pra salvar agora, tenta de novo.')).toBeInTheDocument()
+  })
+
+  it('shows inline error and stays open when onRemove rejects', async () => {
+    const { onRemove, onClose } = setup({ isOwner: true })
+    onRemove.mockRejectedValueOnce(new Error('x'))
+    fireEvent.click(screen.getByRole('button', { name: 'Remover do catálogo' }))
+    expect(await screen.findByText('Não deu pra salvar agora, tenta de novo.')).toBeInTheDocument()
+    expect(onClose).not.toHaveBeenCalled()
+  })
+
+  it('shows load error instead of Carregando when loadFailed', () => {
+    render(<DetailsModal details={null} loadFailed entry={null} isOwner={false} onApply={vi.fn()} onAdd={vi.fn()} onRemove={vi.fn()} onClose={vi.fn()} />)
+    expect(screen.getByText('Não deu pra carregar esse filme agora.')).toBeInTheDocument()
+    expect(screen.queryByText('Carregando…')).toBeNull()
   })
 
   it('moves focus in, traps Tab, restores focus and locks scroll', () => {
