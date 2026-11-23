@@ -12,11 +12,15 @@ interface Props {
   entry: Entry | null
   isOwner: boolean
   onApply: (fn: (current: Entry[]) => Entry[]) => Promise<void>
-  onAdd: (s: Summary) => Promise<void>
+  onAdd: (s: Summary) => Promise<unknown>
   onRemove: (key: string) => Promise<void>
   onPropose: (key: string, when: number) => Promise<void>
   onClose: () => void
 }
+
+const WATCHED_FMT = new Intl.DateTimeFormat('pt-BR', {
+  timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit', year: 'numeric',
+})
 
 function runtime(min: number | null): string | null {
   if (min === null) return null
@@ -74,7 +78,7 @@ export default function DetailsModal({ details, loadFailed = false, entry, isOwn
     }
   }, [])
 
-  const run = useCallback(async (fn: () => Promise<void>) => {
+  const run = useCallback(async (fn: () => Promise<unknown>) => {
     setFailed(false)
     try {
       await fn()
@@ -200,7 +204,13 @@ export default function DetailsModal({ details, loadFailed = false, entry, isOwn
                         Remover do catálogo
                       </button>
                     )}
-                    <SessionPicker onPropose={(when) => onPropose(key, when)} onError={() => setFailed(true)} />
+                    <SessionPicker
+                      onPropose={async (when) => {
+                        await onPropose(key, when)
+                        setFailed(false)
+                      }}
+                      onError={() => setFailed(true)}
+                    />
                   </>
                 )}
               </div>
@@ -210,6 +220,9 @@ export default function DetailsModal({ details, loadFailed = false, entry, isOwn
                 <span>{meta}</span>
                 {details.certification && <span className="modal-cert">{details.certification}</span>}
               </p>
+              {entry?.status === 'assistido' && entry.watchedAt !== null && (
+                <p className="modal-credit">Vimos em {WATCHED_FMT.format(entry.watchedAt)}</p>
+              )}
               {details.genres.length > 0 && <p className="modal-genres">{details.genres.join(' · ')}</p>}
               {details.director && <p className="modal-credit">Direção: {details.director}</p>}
               {details.cast.length > 0 && <p className="modal-credit">Elenco: {details.cast.join(', ')}</p>}

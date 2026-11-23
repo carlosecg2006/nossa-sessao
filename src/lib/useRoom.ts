@@ -13,6 +13,7 @@ export function useRoom(roomId: string, ownerKey: string | null) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isOwner, setIsOwner] = useState(false)
+  const [notFound, setNotFound] = useState(false)
   const current = useRef<Entry[]>([])
 
   useEffect(() => {
@@ -22,6 +23,7 @@ export function useRoom(roomId: string, ownerKey: string | null) {
     setLoading(true)
     setError(null)
     setIsOwner(false)
+    setNotFound(false)
     current.current = []
 
     const fail = () => {
@@ -36,13 +38,18 @@ export function useRoom(roomId: string, ownerKey: string | null) {
     ensureAuth()
       .then(async () => {
         if (cancelled) return
-        if (ownerKey !== null) {
-          try {
-            const snap = await getDoc(doc(db(), 'rooms', roomId))
-            if (!cancelled) setIsOwner(snap.exists() && snap.data().ownerKey === ownerKey)
-          } catch {
-            // not owner if unreadable
+        try {
+          const snap = await getDoc(doc(db(), 'rooms', roomId))
+          if (cancelled) return
+          if (!snap.exists()) {
+            clearTimeout(timer)
+            setNotFound(true)
+            setLoading(false)
+            return
           }
+          if (ownerKey !== null) setIsOwner(snap.data().ownerKey === ownerKey)
+        } catch {
+          // not owner if unreadable
         }
         if (cancelled) return
         unsub = onSnapshot(
@@ -86,8 +93,9 @@ export function useRoom(roomId: string, ownerKey: string | null) {
     async (s: Summary) => {
       const before = current.current
       const next = addToCatalog(before, s, Date.now())
-      if (next.length === before.length) return
+      if (next.length === before.length) return 'exists' as const
       await setDoc(doc(db(), 'rooms', roomId, 'entries', next[next.length - 1].key), next[next.length - 1])
+      return 'added' as const
     },
     [roomId],
   )
@@ -109,5 +117,5 @@ export function useRoom(roomId: string, ownerKey: string | null) {
     [commit],
   )
 
-  return { entries, loading, error, isOwner, save, remove, add, commit, apply }
+  return { entries, loading, error, notFound, isOwner, save, remove, add, commit, apply }
 }

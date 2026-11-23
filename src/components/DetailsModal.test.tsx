@@ -240,4 +240,31 @@ describe('DetailsModal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Enviar' }))
     expect(await screen.findByText('Não deu pra salvar agora, tenta de novo.')).toBeInTheDocument()
   })
+
+  it('shows the watched date (America/Sao_Paulo) only for watched entries', () => {
+    // 2026-03-05T01:30Z is still 04/03 in Sao Paulo (UTC-3)
+    const { unmount } = render(
+      <DetailsModal details={details()} entry={entry({ status: 'assistido', watchedAt: Date.UTC(2026, 2, 5, 1, 30) })} isOwner={false}
+        onApply={vi.fn()} onAdd={vi.fn()} onRemove={vi.fn()} onPropose={vi.fn()} onClose={vi.fn()} />,
+    )
+    expect(screen.getByText('Vimos em 04/03/2026')).toBeInTheDocument()
+    unmount()
+    setup({ entry: entry({ status: 'fila' }) })
+    expect(screen.queryByText(/Vimos em/)).toBeNull()
+  })
+
+  it('a successful propose clears an earlier save error', async () => {
+    const onPropose = vi.fn().mockRejectedValueOnce(new Error('x')).mockResolvedValue(undefined)
+    render(
+      <DetailsModal details={details()} entry={entry()} isOwner={false} onApply={vi.fn()} onAdd={vi.fn()}
+        onRemove={vi.fn()} onPropose={onPropose} onClose={vi.fn()} />,
+    )
+    fireEvent.click(screen.getByRole('button', { name: '📅 Marcar sessão' }))
+    fireEvent.change(screen.getByLabelText('Dia e horário'), { target: { value: '2999-01-01T20:00' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Enviar' }))
+    expect(await screen.findByText('Não deu pra salvar agora, tenta de novo.')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Enviar' }))
+    expect(await screen.findByText('Pedido enviado!')).toBeInTheDocument()
+    expect(screen.queryByText('Não deu pra salvar agora, tenta de novo.')).toBeNull()
+  })
 })

@@ -16,9 +16,18 @@ import Row from './components/Row'
 import SearchBar from './components/SearchBar'
 import SessionBanner from './components/SessionBanner'
 
+function MissingRoom() {
+  return (
+    <>
+      <Header />
+      <p className="state">Link incompleto, peça o link certo pro Carlos</p>
+    </>
+  )
+}
+
 function RoomView({ roomId, ownerKey }: { roomId: string; ownerKey: string | null }) {
-  const { entries, loading, error, isOwner, add, remove, apply } = useRoom(roomId, ownerKey)
-  const detailsByKey = useDetails(entries)
+  const { entries, loading, error, notFound, isOwner, add, remove, apply } = useRoom(roomId, ownerKey)
+  const { details: detailsByKey, failedCount } = useDetails(entries)
   const { sessions, save: saveSession } = useSessions(roomId)
   const me = isOwner ? 'dono' : 'amiga'
   const [now, setNow] = useState(() => Date.now())
@@ -34,6 +43,12 @@ function RoomView({ roomId, ownerKey }: { roomId: string; ownerKey: string | nul
   const [selectedKey, setSelectedKey] = useState<string | null>(null)
   const [fetched, setFetched] = useState<{ key: string; details: Details | null } | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
+  const [info, setInfo] = useState<string | null>(null)
+  useEffect(() => {
+    if (!info) return
+    const t = setTimeout(() => setInfo(null), 3000)
+    return () => clearTimeout(t)
+  }, [info])
 
   useEffect(() => {
     let cancelled = false
@@ -93,7 +108,10 @@ function RoomView({ roomId, ownerKey }: { roomId: string; ownerKey: string | nul
 
   const onAdd = (s: Summary) => {
     setNotice(null)
-    add(s).catch(() => setNotice('Não deu pra adicionar agora, tenta de novo.'))
+    add(s).then(
+      (r) => setInfo(r === 'exists' ? 'Já está no catálogo' : `Adicionado: ${s.title}`),
+      () => setNotice('Não deu pra adicionar agora, tenta de novo.'),
+    )
   }
   const heroApply = (fn: (es: Entry[]) => Entry[]) => {
     setNotice(null)
@@ -104,7 +122,9 @@ function RoomView({ roomId, ownerKey }: { roomId: string; ownerKey: string | nul
     saveSession(s).catch(() => setNotice('Não deu pra salvar agora, tenta de novo.'))
   }
   const onPropose = (key: string, when: number) => saveSession(propose(key, when, me, Date.now()))
+  if (notFound) return <MissingRoom />
   const ready = !loading && !error
+  const tmdbFailed = entries.length > 0 && failedCount > 0 && Object.keys(detailsByKey).length === 0
 
   let body
   if (loading) body = <p className="state">Carregando…</p>
@@ -120,6 +140,7 @@ function RoomView({ roomId, ownerKey }: { roomId: string; ownerKey: string | nul
             onWant={(key) => heroApply((es) => react(es, key, 'quero', Date.now(), isOwner ? 'dono' : 'amiga'))}
             onQueue={(key) => heroApply((es) => addToQueue(es, key))}
           />}
+        {tmdbFailed && <p className="state" role="alert">Não deu pra carregar os filmes agora. Recarrega a página.</p>}
         <main className={`rows${hero ? ' rows--hero' : ''}`}>
           {rows.map((r) => (
             <Row
@@ -144,6 +165,7 @@ function RoomView({ roomId, ownerKey }: { roomId: string; ownerKey: string | nul
           {notice}
         </p>
       )}
+      {info && <p className="state state--info" role="status">{info}</p>}
       <SessionBanner
         sessions={sessions}
         me={me}
@@ -180,10 +202,5 @@ function RoomView({ roomId, ownerKey }: { roomId: string; ownerKey: string | nul
 export default function App() {
   const room = parseRoom(window.location.search)
   if (room) return <RoomView roomId={room.roomId} ownerKey={room.ownerKey} />
-  return (
-    <>
-      <Header />
-      <p className="state">Link incompleto, peça o link certo pro Carlos</p>
-    </>
-  )
+  return <MissingRoom />
 }

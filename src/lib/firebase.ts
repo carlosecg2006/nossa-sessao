@@ -29,7 +29,8 @@ export function db(): Firestore {
 
 export function ensureAuth(): Promise<void> {
   if (!authPromise) {
-    authPromise = signInAnonymously(getAuth(getApp())).then(
+    // Promise.resolve().then so a synchronous throw (missing/invalid apiKey) becomes a rejection.
+    authPromise = Promise.resolve().then(() => signInAnonymously(getAuth(getApp()))).then(
       () => undefined,
       (err) => {
         authPromise = null
